@@ -1,15 +1,24 @@
 /*
 Author: Victor Hao & Noah Koorndyk & Roberto Jimenez
-Uniqname: vhao
 Date Created: 12/6/2017
+Last Update: 12/8/17 5:51 PM
 Lab Section: 103
 Project #: Team Hack
 Filename: dijkstra.cpp
 
 Program Description: Implementation of Dijkstra's pathfinding algorithm for a maze.
+A slight twist on classic dijkstra's since each pixel move has the same weight of 1.
+First we crawl the entire maze and assign their respective cost values until the
+end is found. Then, we can read the path back from the end by simply choosing an
+adjacent move which has the lowest value of the four possible moves. Returned
+finalPath corresponds exactly with pixel coords in image (does not start at 0 due to
+nature of padding).
+
 NOTES: This could probably be done much more efficiently with a 1D array. When this
-code is converted to C# that is what I recommend be done.
-MUST BE COMPILED IN C++ 11
+code is converted to C# that is what I recommend be done if possible (although not
+necessary).
+
+MUST BE COMPILED IN C++ 11 or above.
 */
 
 #include <fstream>
@@ -25,13 +34,32 @@ using namespace std;
 void padMaze(vector<vector<int> > & input) {
 
 	//Create padded as a vector of vectors of size [input rows+2][input cols+2]
-	//filled with -1.
-	vector<vector<int> > padded(input.size() + 2, vector<int>(input.at(0).size(), -1));
+	//filled with -1. This prevents accessing invalid positions.
+	vector<vector<int> > padded(input.size() + 2, vector<int>(input.at(0).size() + 2, -1));
 
-	//Assign inside of padded to input
-	for (unsigned int i = 0; i < input.size(); i++) {
-		for (unsigned int j = 0; j < input.at(0).size(); j++) {
-			padded.at(i + 1).at(j + 1) = input.at(i).at(j);
+	//Create a new grid that has walls represented with -1 instead of 1
+	vector<vector<int> > modGrid = input;
+	for (unsigned int i = 0; i < modGrid.size(); i++) {
+		for (unsigned int j = 0; j < modGrid.at(0).size(); j++) {
+			if (input.at(i).at(j) == 1) {
+				modGrid.at(i).at(j) = -1;
+			}
+		}
+	}
+
+	//Debug print (remove in final iteration)
+	cout << "here 2" << endl;
+	for (unsigned int i = 0; i < modGrid.size(); i++) {
+		for (unsigned int j = 0; j < modGrid.at(0).size(); j++) {
+			cout << modGrid.at(i).at(j) << " ";
+		}
+		cout << endl;
+	}
+
+	//Assign inside of padded to modGrid
+	for (unsigned int i = 0; i < modGrid.size(); i++) {
+		for (unsigned int j = 0; j < modGrid.at(0).size(); j++) {
+			padded.at(i + 1).at(j + 1) = modGrid.at(i).at(j);
 		}
 	}
 
@@ -43,11 +71,11 @@ void padMaze(vector<vector<int> > & input) {
 vector<vector<int> >  mazeSolve(vector<vector<int> > grid, vector<int> start, vector<int> end) {
 
 	//Initialize Variables
-	bool notSolved = false, changedVals = false, home = false;
+	bool notSolved = true, changedVals = false, home = false;
+	//curSweep should look for start in the first iteration
 	int curSweep = 1;
 	vector<vector<int> > crawled;
 	vector<vector<int> > finalPath;
-	finalPath.push_back(end);
 
 	//Pad the outside of the maze with a wall (stops index out of bounds)
 	padMaze(grid);
@@ -94,55 +122,60 @@ vector<vector<int> >  mazeSolve(vector<vector<int> > grid, vector<int> start, ve
 						break;
 					}
 				}
+				//Break out of the outer loop if solved
+				if (notSolved == false) {
+					break;
+				}
 			}
 		}
 		//If we didn't change any values and didn't find the end, we failed (break)
 		if (!changedVals) {
 			cout << "Oh no.";
-			break;
+			return finalPath;
 		}
 		//Increment curSweep
 		curSweep++;
 	}
 
 	//Initialize some variables
+	finalPath.push_back(end);
 	vector<int> curPos = end;
 	vector<int> nextPos(2);
 	int curVal = INT_MAX, temp;
-	grid.at(end.at(1)).at(end.at(2)) = INT_MAX;
+	grid.at(end.at(0)).at(end.at(1)) = INT_MAX;
 	//This loop traces the shortest path by choosing positions with the lowest value
 	while (!home) {
 
 		//Set temp to above value
-		temp = grid.at(curPos.at(1) - 1).at(curPos.at(2));
-		//If temp is not 0 and it is less than curVal, set nextPos to above and set
-		//curVal to temp
-		if (temp != 0 && temp < curVal) {
-			nextPos.at(1) = curPos.at(1) - 1;
-			nextPos.at(2) = curPos.at(2);
+		temp = grid.at(curPos.at(0) - 1).at(curPos.at(1));
+		//If temp is larger than 0 and it is less than curVal, set nextPos to above
+		//and set curVal to temp
+		if (temp > 0 && temp < curVal) {
+			nextPos.at(0) = curPos.at(0) - 1;
+			nextPos.at(1) = curPos.at(1);
 			curVal = temp;
 		}
 
 		//Same operations done below for bottom, left, and right
 
-		temp = grid.at(curPos.at(1) + 1).at(curPos.at(2));
-		if (temp != 0 && temp < curVal) {
+		temp = grid.at(curPos.at(0) + 1).at(curPos.at(1));
+		if (temp > 0 && temp < curVal) {
+			nextPos.at(0) = curPos.at(0) + 1;
+			nextPos.at(1) = curPos.at(1);
+			curVal = temp;
+		}
+
+		temp = grid.at(curPos.at(0)).at(curPos.at(1) - 1);
+		if (temp > 0 && temp < curVal) {
+			nextPos.at(0) = curPos.at(0);
+			nextPos.at(1) = curPos.at(1) - 1;
+			curVal = temp;
+		}
+
+		temp = grid.at(curPos.at(0)).at(curPos.at(1) + 1);
+		if (temp > 0 && temp < curVal) {
+			nextPos.at(0) = curPos.at(0);
 			nextPos.at(1) = curPos.at(1) + 1;
-			nextPos.at(2) = curPos.at(2);
-			curVal = temp;
-		}
-
-		temp = grid.at(curPos.at(1)).at(curPos.at(2) - 1);
-		if (temp != 0 && temp < curVal) {
-			nextPos.at(1) = curPos.at(1);
-			nextPos.at(2) = curPos.at(2) - 1;
-			curVal = temp;
-		}
-
-		temp = grid.at(curPos.at(1)).at(curPos.at(2) + 1);
-		if (temp != 0 && temp < curVal) {
-			nextPos.at(1) = curPos.at(1);
-			nextPos.at(2) = curPos.at(2) + 1;
 			curVal = temp;
 		}
 
@@ -158,18 +191,54 @@ vector<vector<int> >  mazeSolve(vector<vector<int> > grid, vector<int> start, ve
 		}
 	}
 
-	//Outputs some text to console depending on whether the maze was solved or not
-	if (notSolved == true) {
-		cout << "REKT";
-	}
-	else {
-		cout << "YITE!";
-	}
-
 	//Returns the solved path
 	return finalPath;
 }
 
+//Temporary test setup
+//The following works with the basictestmaze.txt on github
 int main() {
+	//Initialize Vars
+	ifstream mazeRead("insert file path here"); //careful with escape chars
+	vector<vector<int> > grid;
+	//Choose the start and end
+	vector<int> start = { 2,2 };
+	vector<int> end = { 4,13 };
+	//Text File read is only meant for testing, so must specify exact size of maze
+	int numRows = 7;
+	int numCols = 14;
+
+	//Initialize temporary vars
+	int temp;
+	vector<int> tempVec;
+	//Reads in the maze
+	for (int i = 0; i < 7; i++) {
+		for (int j = 0; j < 14; j++) {
+			mazeRead >> temp;
+			tempVec.push_back(temp);
+		}
+		grid.push_back(tempVec);
+		tempVec.clear();
+	}
+
+	//Debug print (remove later)
+	cout << "here 1" << endl;
+	for (unsigned int i = 0; i < grid.size(); i++) {
+		for (unsigned int j = 0; j < grid.at(0).size(); j++) {
+			cout << grid.at(i).at(j) << " ";
+		}
+		cout << endl;
+	}
+
+	//Get the shortest path by calling mazeSolve()
+	vector<vector<int> > path = mazeSolve(grid, start, end);
+
+	//Debug print (remove later)
+	for (unsigned int i = 0; i < path.size(); i++) {
+		cout << path.at(i).at(0) << " " << path.at(i).at(1) << endl;
+	}
+
+	//Close the file
+	mazeRead.close();
 	return 0;
 }
