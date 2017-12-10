@@ -73,27 +73,74 @@ vector<point> getNeighbors(point loc, vector<vector<bool> > maze) {
     dim[0] = int(maze.size());
     dim[1] = int(maze[0].size());
 
+    bool left = loc[1] > 0;
+    bool right = loc[1] < dim[1]-1;
+    bool top = loc[0] > 0;
+    bool bottom = loc[0] < dim[0]-1;
+
+    vector<vector<bool> > map {
+        {1, 1, 1},
+        {1, 0, 1},
+        {1, 1, 1}
+    };
+
+    //Remove invalid options
+    if(!left) {
+        map[0][0] = 0;
+        map[1][0] = 0;
+        map[2][0] = 0;
+    }
+    if(!right) {
+        map[0][2] = 0;
+        map[1][2] = 0;
+        map[2][2] = 0;
+    }
+    if(!top) {
+        map[0][0] = 0;
+        map[0][1] = 0;
+        map[0][2] = 0;
+    }
+    if(!bottom) {
+        map[2][0] = 0;
+        map[2][1] = 0;
+        map[2][2] = 0;
+    }
+
+    //cout << map[0][0] << map[0][1] << map[0][2] << endl << map[1][0] << map[1][1] << map[1][2] << endl << map[2][0] << map[2][1] << map[2][2] << endl;
+
+    //Load from map
+    for(int i=0; i<int(map.size()); ++i) {
+        for(int j=0; j<int(map.size()); ++j) {
+            if(map[i][j]) {
+                foo[0] = loc[0] + (i-1);
+                foo[1] = loc[1] + (j-1);
+                nbrs.push_back(foo);
+                //cout << i << j << " (" << foo[0] << "," << foo[1] << ")" << endl;
+            }
+        }
+    }
+
     //Load within boundaries
-    if(loc[0] > 0) {
-        foo[0] = loc[0]-1;
-        foo[1] = loc[1];
-        nbrs.push_back(foo);
-    }
-    if(loc[0] < dim[0]-1) {
-        foo[0] = loc[0]+1;
-        foo[1] = loc[1];
-        nbrs.push_back(foo);
-    }
-    if(loc[1] > 0) {
-        foo[0] = loc[0];
-        foo[1] = loc[1]-1;
-        nbrs.push_back(foo);
-    }
-    if(loc[1] < dim[1]-1) {
-        foo[0] = loc[0];
-        foo[1] = loc[1]+1;
-        nbrs.push_back(foo);
-    }
+    // if(loc[0] > 0) {
+    //     foo[0] = loc[0]-1;
+    //     foo[1] = loc[1];
+    //     nbrs.push_back(foo);
+    // }
+    // if(loc[0] < dim[0]-1) {
+    //     foo[0] = loc[0]+1;
+    //     foo[1] = loc[1];
+    //     nbrs.push_back(foo);
+    // }
+    // if(loc[1] > 0) {
+    //     foo[0] = loc[0];
+    //     foo[1] = loc[1]-1;
+    //     nbrs.push_back(foo);
+    // }
+    // if(loc[1] < dim[1]-1) {
+    //     foo[0] = loc[0];
+    //     foo[1] = loc[1]+1;
+    //     nbrs.push_back(foo);
+    // }
 
     //Remove walls
     for(int i=0; i<int(nbrs.size()); ++i) {
