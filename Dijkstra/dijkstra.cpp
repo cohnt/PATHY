@@ -1,7 +1,7 @@
 /*
 Author: Victor Hao & Noah Koorndyk & Roberto Jimenez
 Date Created: 12/6/2017
-Last Update: 12/8/17 5:51 PM
+Last Update: 12/10/17 12:57 PM
 Lab Section: 103
 Project #: Team Hack
 Filename: dijkstra.cpp
@@ -45,15 +45,6 @@ void padMaze(vector<vector<int> > & input) {
 				modGrid.at(i).at(j) = -1;
 			}
 		}
-	}
-
-	//Debug print (remove in final iteration)
-	cout << "here 2" << endl;
-	for (unsigned int i = 0; i < modGrid.size(); i++) {
-		for (unsigned int j = 0; j < modGrid.at(0).size(); j++) {
-			cout << modGrid.at(i).at(j) << " ";
-		}
-		cout << endl;
 	}
 
 	//Assign inside of padded to modGrid
@@ -212,8 +203,8 @@ int main() {
 	int temp;
 	vector<int> tempVec;
 	//Reads in the maze
-	for (int i = 0; i < 7; i++) {
-		for (int j = 0; j < 14; j++) {
+	for (int i = 0; i < numRows; i++) {
+		for (int j = 0; j < numCols; j++) {
 			mazeRead >> temp;
 			tempVec.push_back(temp);
 		}
@@ -221,19 +212,10 @@ int main() {
 		tempVec.clear();
 	}
 
-	//Debug print (remove later)
-	cout << "here 1" << endl;
-	for (unsigned int i = 0; i < grid.size(); i++) {
-		for (unsigned int j = 0; j < grid.at(0).size(); j++) {
-			cout << grid.at(i).at(j) << " ";
-		}
-		cout << endl;
-	}
-
 	//Get the shortest path by calling mazeSolve()
 	vector<vector<int> > path = mazeSolve(grid, start, end);
 
-	//Debug print (remove later)
+	//Prints Path
 	for (unsigned int i = 0; i < path.size(); i++) {
 		cout << path.at(i).at(0) << " " << path.at(i).at(1) << endl;
 	}
