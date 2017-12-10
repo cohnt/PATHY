@@ -39,6 +39,7 @@ point getCurrentPoint(vector<point> openPoints, vector<vector<double> > f, int &
         fCurrent = f[openPoints[i][0]][openPoints[i][1]];
         if(fCurrent < fBest) {
             bestIndex = i;
+            fBest = fCurrent;
         }
     }
     index = bestIndex;
