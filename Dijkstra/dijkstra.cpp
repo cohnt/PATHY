@@ -63,10 +63,9 @@ vector<vector<int> >  mazeSolve(vector<vector<int> > grid, vector<int> start, ve
 
 	//Initialize Variables
 	bool notSolved = true, changedVals = false, home = false;
+	vector<vector<int> > finalPath;
 	//curSweep should look for start in the first iteration
 	int curSweep = 1;
-	vector<vector<int> > crawled;
-	vector<vector<int> > finalPath;
 
 	//Pad the outside of the maze with a wall (stops index out of bounds)
 	padMaze(grid);
