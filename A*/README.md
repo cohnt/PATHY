@@ -1,12 +1,11 @@
 # Standalone A* Implementation
 
 Compile:
+```
 g++ -Wall -Werror -std=c++11 AStar.cpp -o AStar.exe
-
-
 ```
+
 The format for a maze is
-```
 
 
 ```
@@ -17,7 +16,8 @@ maze10,maze11,...,maze1N
    .     .          .
    .        .       .
    .           .    .
-mazeM0,mazeM1,...,MazeMN```
+mazeM0,mazeM1,...,MazeMN
+```
 
 
 Then set the contents of whichMaze.txt to the filename (with extension).
