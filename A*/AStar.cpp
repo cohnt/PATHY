@@ -27,7 +27,11 @@ double heuristic(point current, point goal) {
     //Our heuristic is distance-squared
     //It's really distance, but there's no reason to compute the square root, as
     //sqrt is bijective and strictly increasing
-    return pow(goal[0]-current[0], 2) + pow(goal[1]-current[1], 2);
+    //return pow(goal[0]-current[0], 2) + pow(goal[1]-current[1], 2);
+
+    //New heuristic! Manhattan-Distance
+    //https://math.stackexchange.com/questions/139600/how-to-calculate-the-euclidean-and-manhattan-distance
+    return abs(goal[0]-current[0]) + abs(goal[1]-current[1]);
 }
 point getCurrentPoint(vector<point> openPoints, vector<vector<double> > f, int &index) {
     //Find the point in openPoints which has the smallest f value. We output the index by (&index) and return the point itself.
@@ -145,6 +149,8 @@ bool aStar(vector<point> &path, point start, point end, vector<vector<bool> > ma
         }
         open.erase(open.begin() + currentPointIndex);
         closed.push_back(currentPoint);
+
+        cout << "Iteration " << iters << "\t\tChecking (" << currentPoint[0] << "," << currentPoint[1] << ")\t\t\tOpen array size: " << open.size() << "\t Closed array size: " << closed.size() << endl;
 
         neighbors = getNeighbors(currentPoint, maze);
         for(int i=0; i<int(neighbors.size()); ++i) {
