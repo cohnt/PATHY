@@ -12,8 +12,8 @@ public class loadimage : MonoBehaviour {
 
 	void Start () {
 		rawmaze = (Texture2D)Resources.Load ("maze"); //reading image from resource folder called maze
-		vector = new bool[rawmaze.width, rawmaze.height];
 		rawmaze = downscale (rawmaze, scale);
+		vector = new bool[rawmaze.width, rawmaze.height];
 		Texture2D pmaze = new Texture2D (rawmaze.width, rawmaze.height, TextureFormat.ARGB32, false); //new texture to output processed image
 
 		//image processing algorithm
