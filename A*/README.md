@@ -19,5 +19,6 @@ maze10,maze11,...,maze1N
 mazeM0,mazeM1,...,MazeMN
 ```
 
+Walls are 1, spaces are 0
 
 Then set the contents of whichMaze.txt to the filename (with extension).

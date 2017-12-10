@@ -30,9 +30,11 @@ double heuristic(point current, point goal) {
     return pow(goal[0]-current[0], 2) + pow(goal[1]-current[1], 2);
 }
 point getCurrentPoint(vector<point> openPoints, vector<vector<double> > f, int &index) {
+    //Find the point in openPoints which has the smallest f value. We output the index by (&index) and return the point itself.
+    //Could be made more efficient by not returning anything, and just obtaining that point after using the index, but eh.
     int bestIndex = 0;
-    int fBest = f[openPoints[0][0]][openPoints[0][1]];
-    int fCurrent;
+    double fBest = f[openPoints[0][0]][openPoints[0][1]];
+    double fCurrent;
     for(int i=1; i<int(openPoints.size()); ++i) {
         fCurrent = f[openPoints[i][0]][openPoints[i][1]];
         if(fCurrent < fBest) {
