@@ -25,6 +25,9 @@ enum mazeChar {
     openMark
 };
 
+const int displayMazeRate = 250; //How often to display the current maze.
+const bool useTerminalHackyStuff = true; //Don't ask...
+
 double heuristic(point current, point goal) {
     //Our heuristic is distance-squared
     //It's really distance, but there's no reason to compute the square root, as
@@ -267,8 +270,11 @@ bool aStar(vector<point> &path, point start, point end, vector<vector<bool> > ma
         closed.push_back(currentPoint);
 
         //cout << "Iteration " << iters << "\t\tChecking (" << currentPoint[0] << "," << currentPoint[1] << ")\t\t\tOpen array size: " << open.size() << "\t Closed array size: " << closed.size() << endl;
-        if(iters % 1000 == 0) {
+        if(iters % displayMazeRate == 0) {
             cout << "Iteration " << iters << endl;
+            if(useTerminalHackyStuff) {
+                printf("\033[2J\033[1;1H");
+            }
             printCurrentMaze(maze, start, end, closed, open);
         }
 
