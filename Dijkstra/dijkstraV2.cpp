@@ -1,12 +1,16 @@
 /*
 Author: Victor Hao & Noah Koorndyk & Roberto Jimenez
-Date Created: 12/6/2017
-Last Update: 12/10/17 12:57 PM
+Date Created: 12/10/2017
+Last Update: 12/10/17 3:36 PM
 Lab Section: 103
 Project #: Team Hack
-Filename: dijkstra.cpp
+Filename: dijkstraV2.cpp
 
-Program Description: Implementation of Dijkstra's pathfinding algorithm for a maze.
+Program Description: Updated implementation of Dijkstra's pathfinding algorithm for
+a maze. Avoids iterating over the whole image with every outer loop iteration by
+adding altered points to a queue and only iterating over those points. Dramatic
+runtime decrease with this new optimization.
+
 A slight twist on classic dijkstra's since each pixel move has the same weight of 1.
 First we crawl the entire maze and assign their respective cost values until the
 end is found. Then, we can read the path back from the end by simply choosing an
@@ -14,9 +18,7 @@ adjacent move which has the lowest value of the four possible moves. Returned
 finalPath corresponds exactly with pixel coords in image (does not start at 0 due to
 nature of padding).
 
-NOTES: This could probably be done much more efficiently with a 1D array. When this
-code is converted to C# that is what I recommend be done if possible (although not
-necessary).
+NOTES: Use 1D array if a small optimization is desired.
 
 MUST BE COMPILED IN C++ 11 or above.
 */
@@ -63,7 +65,12 @@ vector<vector<int> >  mazeSolve(vector<vector<int> > grid, vector<int> start, ve
 
 	//Initialize Variables
 	bool notSolved = true, changedVals = false, home = false;
-	vector<vector<int> > finalPath;
+	vector<vector<int> > finalPath, toSweep, queue;
+	vector<int> holding;
+
+	//Begin the sweeps at start
+	toSweep.push_back(start);
+
 	//curSweep should look for start in the first iteration
 	int curSweep = 1;
 
@@ -74,57 +81,89 @@ vector<vector<int> >  mazeSolve(vector<vector<int> > grid, vector<int> start, ve
 	grid.at(end.at(0)).at(end.at(1)) = -2;
 
 	//Loop until the maze is solved
+	int i, j;
 	while (notSolved) {
+
 		changedVals = false;
 		//Loop through all positions in the image
-		for (unsigned int i = 1; i < grid.size() - 1; i++) {
-			for (unsigned int j = 1; j < grid.at(0).size() - 1; j++) {
-				//Check if the value at the location is what we are sweeping for
-				if (grid.at(i).at(j) == curSweep) {
-					//If above value is open, change to curSweep + 1
-					if (grid.at(i - 1).at(j) == 0) {
-						grid.at(i - 1).at(j) = curSweep + 1;
-						//Change changedVals to true
-						changedVals = true;
-					}
+		for (unsigned int a = 0; a < toSweep.size(); a++) {
 
-					//Same operation for below
-					if (grid.at(i + 1).at(j) == 0) {
-						grid.at(i + 1).at(j) = curSweep + 1;
-						changedVals = true;
-					}
+			//Set i,j to row and col coords of current point
+			i = toSweep.at(a).at(0);
+			j = toSweep.at(a).at(1);
 
-					//Same operation for left
-					if (grid.at(i).at(j - 1) == 0) {
-						grid.at(i).at(j - 1) = curSweep + 1;
-						changedVals = true;
-					}
+			//If above value is open, change to curSweep + 1
+			if (grid.at(i - 1).at(j) == 0) {
+				grid.at(i - 1).at(j) = curSweep + 1;
+				//Set changedVals to true
+				changedVals = true;
 
-					//Same operation for right
-					if (grid.at(i).at(j + 1) == 0) {
-						grid.at(i).at(j + 1) = curSweep + 1;
-						changedVals = true;
-					}
+				//Add the coords of changed point to holding
+				holding.push_back(i - 1);
+				holding.push_back(j);
+				//Add point to queue
+				queue.push_back(holding);
+				//Clear holding
+				holding.clear();
+			}
 
-					//Check if any of the adjacent values are the goal
-					if (grid.at(i - 1).at(j) == -2 || grid.at(i + 1).at(j) == -2 || grid.at(i).at(j - 1) == -2 || grid.at(i).at(j + 1) == -2) {
-						notSolved = false;
-						break;
-					}
-				}
-				//Break out of the outer loop if solved
-				if (notSolved == false) {
-					break;
-				}
+			//Same operation for below
+			if (grid.at(i + 1).at(j) == 0) {
+				grid.at(i + 1).at(j) = curSweep + 1;
+				changedVals = true;
+
+				holding.push_back(i + 1);
+				holding.push_back(j);
+				queue.push_back(holding);
+				holding.clear();
+			}
+
+			//Same operation for left
+			if (grid.at(i).at(j - 1) == 0) {
+				grid.at(i).at(j - 1) = curSweep + 1;
+				changedVals = true;
+
+				holding.push_back(i);
+				holding.push_back(j - 1);
+				queue.push_back(holding);
+				holding.clear();
+			}
+
+			//Same operation for right
+			if (grid.at(i).at(j + 1) == 0) {
+				grid.at(i).at(j + 1) = curSweep + 1;
+				changedVals = true;
+
+				holding.push_back(i);
+				holding.push_back(j + 1);
+				queue.push_back(holding);
+				holding.clear();
+			}
+
+			//Check if any of the adjacent values are the goal
+			if (grid.at(i - 1).at(j) == -2 || grid.at(i + 1).at(j) == -2 || grid.at(i).at(j - 1) == -2 || grid.at(i).at(j + 1) == -2) {
+				notSolved = false;
+				break;
 			}
 		}
 		//If we didn't change any values and didn't find the end, we failed (break)
 		if (!changedVals) {
-			cout << "Oh no.";
+			cout << "Oh no." << endl;
 			return finalPath;
 		}
+
 		//Increment curSweep
 		curSweep++;
+		//Clear toSweep
+		toSweep.clear();
+
+		//Add all of queue to toSweep
+		for (unsigned int b = 0; b < queue.size(); b++) {
+			toSweep.push_back(queue.at(b));
+		}
+
+		//Clear queue
+		queue.clear();
 	}
 
 	//Initialize some variables
@@ -192,11 +231,11 @@ int main() {
 	ifstream mazeRead("insert file path here"); //careful with escape chars
 	vector<vector<int> > grid;
 	//Choose the start and end
-	vector<int> start = { 2,2 };
-	vector<int> end = { 4,13 };
+	vector<int> start = { 20,20 };
+	vector<int> end = { 580,345 };
 	//Text File read is only meant for testing, so must specify exact size of maze
-	int numRows = 7;
-	int numCols = 14;
+	int numRows = 601;
+	int numCols = 366;
 
 	//Initialize temporary vars
 	int temp;
