@@ -20,7 +20,9 @@ enum mazeChar {
     space,
     startMark,
     endMark,
-    pathMark
+    pathMark,
+    closedMark,
+    openMark
 };
 
 double heuristic(point current, point goal) {
@@ -152,12 +154,79 @@ vector<point> getNeighbors(point loc, vector<vector<bool> > maze) {
 
     return nbrs;
 }
+void printMazeCharMatrix(vector<vector<mazeChar> > mat) {
+    for(int i=-1; i<int(mat[0].size())+1; ++i) {
+        cout << CHAR_FILLED_BOX;
+    }
+    cout << endl;
+    for(int i=0; i<int(mat.size()); ++i) {
+        cout << CHAR_FILLED_BOX;
+        for(int j=0; j<int(mat[i].size()); ++j) {
+            switch(mat[i][j]) {
+                case wall:
+                    cout << CHAR_FILLED_BOX;
+                    break;
+                case space:
+                    cout << " ";
+                    break;
+                case startMark:
+                    cout << "+";
+                    break;
+                case endMark:
+                    cout << "x";
+                    break;
+                case pathMark:
+                    cout << CHAR_DOT;
+                    break;
+                case closedMark:
+                    cout << "#";
+                    break;
+                case openMark:
+                    cout << "@";
+                    break;
+                default:
+                    cout << "?";
+                    break;
+            }
+        }
+        cout << CHAR_FILLED_BOX << endl;
+    }
+    for(int i=-1; i<int(mat[0].size())+1; ++i) {
+        cout << CHAR_FILLED_BOX;
+    }
+    cout << endl;
+}
+void printCurrentMaze(vector<vector<bool> > maze, point start, point end, vector<point> closed, vector<point> open) {
+    vector<vector<mazeChar> > output;
+    for(int i=0; i<int(maze.size()); ++i) {
+        output.push_back(vector<mazeChar>());
+        for(int j=0; j<int(maze[i].size()); ++j) {
+            output[i].push_back(maze[i][j] ? wall : space);
+        }
+    }
+
+    output[start[0]][start[1]] = startMark;
+    output[end[0]][end[1]] = endMark;
+
+    for(int i=0; i<int(closed.size()); ++i) {
+        output[closed[i][0]][closed[i][1]] = closedMark;
+    }
+    for(int i=0; i<int(open.size()); ++i) {
+        output[open[i][0]][open[i][1]] = openMark;
+    }
+
+    printMazeCharMatrix(output);
+}
 bool aStar(vector<point> &path, point start, point end, vector<vector<bool> > maze) {
     vector<point> closed; //Points already searched
     vector<point> open {start}; //Points to be searched
     vector<vector<point> > prev; //For each point, the best point to reach it from
     vector<vector<int> > gScore; //g(n) values
     vector<vector<double> > fScore; //f(n) values
+
+    //Reserve memory for open, closed
+    open.reserve(1000);
+    closed.reserve(int(maze.size())*int(maze[0].size()));
 
     point emptyPoint;
 
@@ -197,7 +266,11 @@ bool aStar(vector<point> &path, point start, point end, vector<vector<bool> > ma
         open.erase(open.begin() + currentPointIndex);
         closed.push_back(currentPoint);
 
-        cout << "Iteration " << iters << "\t\tChecking (" << currentPoint[0] << "," << currentPoint[1] << ")\t\t\tOpen array size: " << open.size() << "\t Closed array size: " << closed.size() << endl;
+        //cout << "Iteration " << iters << "\t\tChecking (" << currentPoint[0] << "," << currentPoint[1] << ")\t\t\tOpen array size: " << open.size() << "\t Closed array size: " << closed.size() << endl;
+        if(iters % 1000 == 0) {
+            cout << "Iteration " << iters << endl;
+            printCurrentMaze(maze, start, end, closed, open);
+        }
 
         neighbors = getNeighbors(currentPoint, maze);
         for(int i=0; i<int(neighbors.size()); ++i) {
@@ -255,42 +328,6 @@ void printPath(vector<point> solution) {
     for(int i=0; i<int(solution.size()); ++i) {
         cout << "(" << solution[i][0] << "," << solution[i][1] << ")" << endl;
     }
-}
-void printMazeCharMatrix(vector<vector<mazeChar> > mat) {
-    for(int i=-1; i<int(mat[0].size())+1; ++i) {
-        cout << CHAR_FILLED_BOX;
-    }
-    cout << endl;
-    for(int i=0; i<int(mat.size()); ++i) {
-        cout << CHAR_FILLED_BOX;
-        for(int j=0; j<int(mat[i].size()); ++j) {
-            switch(mat[i][j]) {
-                case wall:
-                    cout << CHAR_FILLED_BOX;
-                    break;
-                case space:
-                    cout << " ";
-                    break;
-                case startMark:
-                    cout << "+";
-                    break;
-                case endMark:
-                    cout << "x";
-                    break;
-                case pathMark:
-                    cout << CHAR_DOT;
-                    break;
-                default:
-                    cout << "?";
-                    break;
-            }
-        }
-        cout << CHAR_FILLED_BOX << endl;
-    }
-    for(int i=-1; i<int(mat[0].size())+1; ++i) {
-        cout << CHAR_FILLED_BOX;
-    }
-    cout << endl;
 }
 void printMaze(vector<vector<bool> > maze, point start, point end) {
     vector<vector<mazeChar> > output;
