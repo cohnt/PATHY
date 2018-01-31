@@ -6,3 +6,5 @@ Currently supported algorithms:
 - Dijkstra's Algorithm/Breadth First Search
 - A*
 - "Right hand wall following" Algorithm
+
+[Latest PATHY standalone release](https://github.com/cohnt/PATHY/releases/latest)
